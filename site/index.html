@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>issuescope: find related issues in a GitHub tracker</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <div class="brand">issuescope <span id="repo-name" class="muted"></span></div>
+  <div id="status" class="status">Loading DuckDB...</div>
+</header>
+
+<nav class="tabs">
+  <button data-tab="search" class="active">Search</button>
+  <button data-tab="sql">SQL</button>
+  <button data-tab="calib">Calibration</button>
+  <button data-tab="about">About</button>
+</nav>
+
+<main>
+<section id="tab-search" class="tab active">
+  <form id="search-form" class="searchbar">
+    <textarea id="q" rows="2" placeholder="Describe the feature or bug, e.g. 'stack 2D GeoTIFF time slices into a new time dimension with gdal mdim mosaic'"></textarea>
+    <div class="filters">
+      <label>Type <select id="f-type"><option value="all">issues + PRs</option><option value="issue" selected>issues</option><option value="pr">PRs</option></select></label>
+      <label>State <select id="f-state"><option value="all">any</option><option value="open" selected>open</option><option value="closed">closed</option><option value="merged">merged PRs</option></select></label>
+      <label>Label contains <input id="f-label" size="10"></label>
+      <label>Updated since <input id="f-since" type="date"></label>
+      <button type="submit" class="primary">Search</button>
+    </div>
+  </form>
+  <div class="weights" id="weights"></div>
+  <div class="split">
+    <div id="results" class="results"><p class="muted">Results appear here. Each row has + / - buttons to mark it relevant or not for this query; marks drive the Calibration tab.</p></div>
+    <aside id="detail" class="detail"><p class="muted">Click a result to see its links, cross-references, similar threads and the conversation.</p></aside>
+  </div>
+  <div class="export">
+    <label>Export top <input id="x-n" type="number" value="10" min="1" max="100" size="3"> results</label>
+    <button id="x-md">as Markdown for an agent</button>
+    <button id="x-csv">as CSV</button>
+    <span id="x-msg" class="muted"></span>
+  </div>
+</section>
+
+<section id="tab-sql" class="tab">
+  <div class="sqlbar">
+    <select id="sql-preset"></select>
+    <button id="sql-run" class="primary">Run</button>
+    <button id="sql-csv">Download CSV</button>
+    <span id="sql-msg" class="muted"></span>
+  </div>
+  <textarea id="sql" rows="12" spellcheck="false"></textarea>
+  <div id="sql-out" class="tablewrap"></div>
+</section>
+
+<section id="tab-calib" class="tab">
+  <div id="calib"></div>
+</section>
+
+<section id="tab-about" class="tab">
+  <div id="about"></div>
+</section>
+</main>
+
+<div class="livebar">
+  <span id="live-msg" class="muted"></span>
+  <label>GitHub token (optional, kept for this tab only) <input id="gh-token" type="password" size="14"></label>
+  <button id="live-btn">Refresh from GitHub</button>
+</div>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>

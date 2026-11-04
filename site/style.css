@@ -1,0 +1,49 @@
+:root { --fg:#1d232b; --muted:#6b7480; --line:#dfe3e8; --bg:#fafbfc; --accent:#2b6cb0; --ok:#2f855a; --bad:#c53030; }
+* { box-sizing: border-box; }
+body { margin:0; font:14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; color:var(--fg); background:var(--bg); }
+header { display:flex; justify-content:space-between; align-items:center; padding:10px 16px; border-bottom:1px solid var(--line); background:#fff; }
+.brand { font-weight:600; font-size:16px; }
+.muted { color:var(--muted); font-weight:normal; }
+.status { color:var(--muted); font-size:13px; }
+.tabs { display:flex; gap:4px; padding:6px 16px 0; background:#fff; border-bottom:1px solid var(--line); }
+.tabs button { border:1px solid transparent; border-bottom:none; background:none; padding:6px 12px; cursor:pointer; color:var(--muted); border-radius:6px 6px 0 0; }
+.tabs button.active { border-color:var(--line); background:var(--bg); color:var(--fg); font-weight:600; margin-bottom:-1px; }
+main { padding:12px 16px 70px; }
+.tab { display:none; } .tab.active { display:block; }
+textarea, input, select, button { font:inherit; }
+textarea { width:100%; padding:8px; border:1px solid var(--line); border-radius:6px; background:#fff; }
+#sql { font-family: ui-monospace, Menlo, Consolas, monospace; font-size:13px; }
+.filters, .sqlbar, .export { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin:8px 0; }
+button { padding:5px 10px; border:1px solid var(--line); border-radius:6px; background:#fff; cursor:pointer; }
+button.primary { background:var(--accent); border-color:var(--accent); color:#fff; }
+button:disabled { opacity:.5; cursor:default; }
+.weights { display:flex; flex-wrap:wrap; gap:14px; font-size:12px; color:var(--muted); margin:4px 0 8px; }
+.weights label { display:flex; gap:6px; align-items:center; }
+.weights input[type=range] { width:90px; }
+.split { display:grid; grid-template-columns: minmax(0,1.25fr) minmax(0,1fr); gap:14px; }
+@media (max-width: 900px) { .split { grid-template-columns: 1fr; } }
+.results, .detail { background:#fff; border:1px solid var(--line); border-radius:8px; padding:8px; min-height:300px; }
+.detail { max-height: 78vh; overflow:auto; position:sticky; top:8px; }
+.row { display:grid; grid-template-columns: 54px 1fr auto; gap:8px; padding:6px 4px; border-bottom:1px solid var(--line); cursor:pointer; }
+.row:hover { background:#f3f6fa; } .row.sel { background:#eaf1fb; }
+.row .num { font-variant-numeric: tabular-nums; color:var(--accent); }
+.row .meta { font-size:12px; color:var(--muted); }
+.row .marks button { padding:1px 7px; margin-left:2px; }
+.row .marks button.on.plus { background:var(--ok); color:#fff; border-color:var(--ok); }
+.row .marks button.on.minus { background:var(--bad); color:#fff; border-color:var(--bad); }
+.pill { display:inline-block; font-size:11px; padding:0 6px; border-radius:9px; border:1px solid var(--line); margin-right:4px; }
+.pill.open { border-color:var(--ok); color:var(--ok); } .pill.closed { color:var(--muted); } .pill.merged { border-color:#6b46c1; color:#6b46c1; }
+.detail h3 { margin:4px 0 6px; font-size:15px; }
+.detail h4 { margin:12px 0 4px; font-size:13px; color:var(--muted); text-transform:uppercase; letter-spacing:.03em; }
+.detail ul { margin:0; padding-left:18px; } .detail li { margin:2px 0; }
+.detail a.jump { cursor:pointer; color:var(--accent); text-decoration:none; }
+.comment { border-top:1px solid var(--line); padding:6px 0; white-space:pre-wrap; word-wrap:break-word; font-size:13px; }
+.comment .who { font-size:12px; color:var(--muted); }
+.tablewrap { overflow:auto; max-height:65vh; background:#fff; border:1px solid var(--line); border-radius:8px; margin-top:8px; }
+table { border-collapse:collapse; font-size:12.5px; width:100%; }
+th, td { border-bottom:1px solid var(--line); padding:4px 8px; text-align:left; vertical-align:top; }
+th { position:sticky; top:0; background:#f3f5f8; }
+.livebar { position:fixed; bottom:0; left:0; right:0; display:flex; gap:12px; align-items:center; justify-content:flex-end; padding:8px 16px; background:#fff; border-top:1px solid var(--line); font-size:13px; }
+.livebar #live-msg { margin-right:auto; }
+.card { background:#fff; border:1px solid var(--line); border-radius:8px; padding:12px; margin-bottom:12px; }
+code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size:12.5px; background:#f1f3f5; padding:0 3px; border-radius:3px; }

@@ -1,0 +1,5 @@
+site/data/
+snap*/
+out*/
+__pycache__/
+*.pyc

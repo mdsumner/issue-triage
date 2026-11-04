@@ -1,0 +1,60 @@
+name: harvest-and-deploy
+
+# Daily full snapshot of the tracker -> static data files -> GitHub Pages.
+# A full harvest of OSGeo/gdal is roughly 450 REST calls, well inside the
+# 1000/hour limit of the workflow token, so no state is kept between runs.
+
+on:
+  schedule:
+    - cron: "17 19 * * *"   # 06:17 in Hobart during daylight saving (AEDT)
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ["site/**", "build/**", "triage/**", ".github/workflows/**"]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+env:
+  TRACKER_REPO: ${{ vars.TRACKER_REPO || 'OSGeo/gdal' }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pandas pyarrow duckdb scikit-learn
+      - name: Harvest issues, PRs and comments
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python -u triage/harvest.py --repo "$TRACKER_REPO" --out snap
+      - name: Build static data
+        run: python build/build_data.py --snap snap --out site/data
+      - name: Keep the raw snapshot as a workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: snapshot
+          path: snap/
+          retention-days: 14
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4
