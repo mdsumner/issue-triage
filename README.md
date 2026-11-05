@@ -23,6 +23,14 @@ point it elsewhere).
   cross-referenced issues, never-answered issues, BM25 by hand, ...).
 - **Agent export.** The top results, with full bodies and conversations, as one
   Markdown file.
+- **From my tracker.** A picker over the open items of a downstream wish-list
+  tracker (default: `wishes.json` from mdsumner/osgeo-upstream, written by its
+  `scripts/wishes.py`). Choosing one runs its search words; marks are kept per
+  wish (query label `tracker #N`). Set `window.ISSUESCOPE_WISHES` to another
+  URL, or to `""` to hide the picker.
+- **Deep links.** `#q=<words>` runs a search, `#wish=<N>` runs tracker item N,
+  `#live` refreshes from GitHub on load. The address bar follows each search,
+  so a result list can be shared as a link.
 
 Tables: `items`, `postings`, `vocab`, `links`, `xrefs`, `xin`, `corpus_stats`,
 `live_log`, plus `bodies` and `comments` (loaded on first use).
