@@ -13,6 +13,11 @@ const DATA = "data/";
 const K1 = 1.2, B = 0.75;
 const MARKS_KEY = "issuescope.marks.v1";
 const WEIGHTS_KEY = "issuescope.weights.v2";
+// Wish list from a downstream tracker (scripts/wishes.py in mdsumner/osgeo-upstream):
+// {repo, generated, wishes: [{number, title, url, priority, status, search, ...}]}.
+// Set window.ISSUESCOPE_WISHES to another URL, or to "" to turn the picker off.
+const WISHES_URL = window.ISSUESCOPE_WISHES !== undefined ? window.ISSUESCOPE_WISHES
+  : "https://raw.githubusercontent.com/mdsumner/osgeo-upstream/main/wishes.json";
 
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -23,6 +28,7 @@ let lazyLoaded = {};
 let lastResults = [];
 let lastQuery = "";
 let liveCount = 0;
+let wishes = [];
 
 // ---------------------------------------------------------------- storage
 function load(key, dflt) { try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : dflt; } catch (e) { return dflt; } }
@@ -188,6 +194,50 @@ async function runSearch(text, opts = {}) {
   rows.sort((a, b) => b.score - a.score);
   lastResults = rows.filter((r) => r.number !== opts.exclude).slice(0, 60);
   renderResults(performance.now() - t0, terms.length);
+  setHash(opts.hash || { q: text.trim() });
+}
+
+// ---------------------------------------------------------------- deep links
+// #q=<text> runs a search, #wish=<tracker issue number> runs that wish, #live refreshes.
+function hashParams() {
+  const h = location.hash.slice(1);
+  return h === "live" ? new URLSearchParams("live=1") : new URLSearchParams(h);
+}
+function setHash(obj) {
+  const p = new URLSearchParams(obj);
+  try { history.replaceState(null, "", "#" + p.toString()); } catch (e) { /* ignore */ }
+}
+
+// ---------------------------------------------------------------- tracker wishes
+async function loadWishes() {
+  if (!WISHES_URL) return;
+  try {
+    const r = await fetch(WISHES_URL, { cache: "no-cache" });
+    if (!r.ok) throw new Error(r.status + " " + r.statusText);
+    const j = await r.json();
+    wishes = j.wishes || [];
+    const sel = $("#wish");
+    for (const w of wishes) {
+      const o = document.createElement("option");
+      o.value = String(w.number);
+      o.textContent = `#${w.number} ${w.priority || "inbox"} ${w.status}: ${w.title}`;
+      sel.appendChild(o);
+    }
+    sel.title = `${wishes.length} open items from ${j.repo || "tracker"}, generated ${j.generated || "?"}`;
+    $("#wish-bar").hidden = !wishes.length;
+  } catch (e) {
+    console.warn("wish list not loaded:", e.message);
+  }
+}
+function runWish(n) {
+  const w = wishes.find((x) => String(x.number) === String(n));
+  if (!w) return false;
+  $("#wish").value = String(w.number);
+  $("#wish-link").href = w.url;
+  $("#wish-link").textContent = `tracker #${w.number}` + (w.search_source === "title" ? " (searching its title; add Search words for better matches)" : "");
+  $("#q").value = w.search;
+  runSearch(w.search, { label: `tracker #${w.number}`, hash: { wish: w.number } });
+  return true;
 }
 
 function pills(r) {
@@ -566,6 +616,8 @@ function renderAbout() {
 
 // ---------------------------------------------------------------- boot
 $("#search-form").addEventListener("submit", (e) => { e.preventDefault(); runSearch($("#q").value); });
+$("#wish").addEventListener("change", () => { if ($("#wish").value) runWish($("#wish").value); });
+$("#q").addEventListener("input", () => { $("#wish").value = ""; $("#wish-link").textContent = ""; $("#wish-link").removeAttribute("href"); });
 $("#q").addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); runSearch($("#q").value); } });
 try { $("#gh-token").value = sessionStorage.getItem("issuescope.token") || ""; } catch (e) { /* ignore */ }
 $("#gh-token").addEventListener("change", () => { try { sessionStorage.setItem("issuescope.token", $("#gh-token").value); } catch (e) { /* ignore */ } });
@@ -576,7 +628,11 @@ $("#gh-token").addEventListener("change", () => { try { sessionStorage.setItem("
     await loadCore();
     renderWeights(); initSQL(); renderAbout();
     $("#live-msg").textContent = `Snapshot ${meta.snapshot_utc.slice(0, 16).replace("T", " ")} UTC. Refresh to merge in later changes.`;
-    if (location.hash === "#live") liveRefresh();
+    await loadWishes();
+    const hp = hashParams();
+    if (hp.get("live")) liveRefresh();
+    else if (hp.get("wish")) runWish(hp.get("wish"));
+    else if (hp.get("q")) { $("#q").value = hp.get("q"); runSearch(hp.get("q")); }
   } catch (e) {
     status("Failed to start: " + e.message);
     console.error(e);

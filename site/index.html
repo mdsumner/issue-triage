@@ -22,6 +22,10 @@
 <main>
 <section id="tab-search" class="tab active">
   <form id="search-form" class="searchbar">
+    <div id="wish-bar" class="filters" hidden>
+      <label>From my tracker <select id="wish"><option value="">(type a query below)</option></select></label>
+      <a id="wish-link" class="muted" target="_blank" rel="noopener"></a>
+    </div>
     <textarea id="q" rows="2" placeholder="Describe the feature or bug, e.g. 'stack 2D GeoTIFF time slices into a new time dimension with gdal mdim mosaic'"></textarea>
     <div class="filters">
       <label>Type <select id="f-type"><option value="all">issues + PRs</option><option value="issue" selected>issues</option><option value="pr">PRs</option></select></label>
